@@ -1,6 +1,6 @@
 {
   "name": "realtime-voice",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "与摄像头进行实时语音对讲、语音喊话、导出喊话文件",
   "main": "index.js",
   "scripts": {
