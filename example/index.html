@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="getMedia">获取浏览器音频</button><br />
+    <button id="intercomBegin">开始对讲</button>
+    <button id="intercomEnd">关闭对讲</button><br />
+    <button id="msgBegin">开始喊话</button>
+    <button id="msgEnd">关闭喊话（发送）</button><br />
+    <button id="downPCM">下载PCM</button>
+    <button id="downWAV">下载WAV</button>
+
+    <script src="../dist/voice.js"></script>
+    <script>
+      let getMedia = document.getElementById('getMedia');
+      let begin = document.getElementById('intercomBegin');
+      let end = document.getElementById('intercomEnd');
+      let msgBegin = document.getElementById('msgBegin');
+      let msgEnd = document.getElementById('msgEnd');
+      let downPCM = document.getElementById('downPCM');
+      let downWAV = document.getElementById('downWAV');
+
+      const config = {
+        url: 'ws://localhost:3000/test',
+      };
+
+      getMedia.onclick = function () {
+        //获取浏览器音频
+        let media = new Voice.Media();
+        media
+          .promiseStream()
+          .then((mediaStream) => {
+            console.log('开始对讲');
+          })
+          .catch((err) => {
+            alert(err);
+          });
+      };
+
+      begin.onclick = function () {
+        //开始对讲，不需要再写获取浏览器音频的代码
+        Voice.speak(config, (err) => {
+          alert(err);
+        });
+      };
+
+      end.onclick = function () {
+        //关闭对讲
+        Voice.stop();
+      };
+
+      msgBegin.onclick = function () {
+        //开始喊话
+        Voice.speakMsg(config, (err) => {
+          alert(err);
+        });
+      };
+
+      msgEnd.onclick = function () {
+        //关闭喊话（发送）
+        Voice.stopMsg();
+      };
+
+      downPCM.onclick = function () {
+        //下载PCM
+        Voice.downloadPCM();
+      };
+
+      downWAV.onclick = function () {
+        //下载WAV
+        Voice.downloadWAV();
+      };
+    </script>
+  </body>
+</html>

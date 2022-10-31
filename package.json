@@ -1,0 +1,20 @@
+{
+  "name": "realtime-voice",
+  "version": "0.0.1",
+  "description": "与摄像头进行实时语音对讲、语音喊话、导出喊话文件",
+  "main": "index.js",
+  "scripts": {
+    "build:watch": "webpack --watch"
+  },
+  "keywords": [
+    "camera",
+    "voice intercom",
+    "voice message"
+  ],
+  "author": "xufeng",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  }
+}
