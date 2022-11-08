@@ -1,4 +1,6 @@
-//获取浏览器录音权限
+/**
+ * 获取浏览器录音权限
+ */
 class Media {
   constructor() {
     this._constraints = {
@@ -7,9 +9,12 @@ class Media {
     };
     let oldUserMedia = function (constraints) {
       let getUserMedia =
-        navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
       if (!getUserMedia) {
-        return Promise.reject(new Error('getUserMedia is not implemented in this browser'));//可能原因有：浏览器不支持、网址不是https 等等
+        return Promise.reject(new Error('getUserMedia is not implemented in this browser')); //可能原因有：浏览器不支持、网址不是https 等等
       }
       return new Promise(function (res, rej) {
         getUserMedia.call(navigator, constraints, res, rej);

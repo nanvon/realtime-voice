@@ -7,7 +7,6 @@
     <title>Document</title>
   </head>
   <body>
-    <button id="getMedia">获取浏览器音频</button><br />
     <button id="intercomBegin">开始对讲</button>
     <button id="intercomEnd">关闭对讲</button><br />
     <button id="msgBegin">开始喊话</button>
@@ -15,9 +14,8 @@
     <button id="downPCM">下载PCM</button>
     <button id="downWAV">下载WAV</button>
 
-    <script src="../dist/voice.js"></script>
+    <script src="../dist/index.js"></script>
     <script>
-      let getMedia = document.getElementById('getMedia');
       let begin = document.getElementById('intercomBegin');
       let end = document.getElementById('intercomEnd');
       let msgBegin = document.getElementById('msgBegin');
@@ -26,54 +24,61 @@
       let downWAV = document.getElementById('downWAV');
 
       const config = {
-        url: 'ws://localhost:3000/test',
+        url: 'ws://192.168.6.129:2333/test',
+        sampleBits: 16, //输出采样数位，可以不配置，默认是16
+        sampleRate: 8000, //输出采样率，可以不配置，默认是8k
       };
-
-      getMedia.onclick = function () {
-        //获取浏览器音频
-        let media = new Voice.Media();
-        media
-          .promiseStream()
-          .then((mediaStream) => {
-            console.log('开始对讲');
-          })
-          .catch((err) => {
-            alert(err);
-          });
-      };
+      var voiceItc = null;
+      var voiceMsg = null;
 
       begin.onclick = function () {
         //开始对讲，不需要再写获取浏览器音频的代码
-        Voice.speak(config, (err) => {
-          alert(err);
-        });
+        if (!voiceItc) {
+          voiceItc = RealtimeVoice.VoiceIntercom.createIntercom(config);
+          voiceItc.startSpeak((errCb) => {
+            console.log(errCb);
+          });
+        }
       };
 
       end.onclick = function () {
         //关闭对讲
-        Voice.stop();
+        if (voiceItc) {
+          voiceItc.stopSpeak();
+          voiceItc = null;
+        }
       };
 
       msgBegin.onclick = function () {
         //开始喊话
-        Voice.speakMsg(config, (err) => {
-          alert(err);
-        });
+        if (!voiceMsg) {
+          voiceMsg = RealtimeVoice.VoiceMessage.createMsg(config);
+          voiceMsg.startSpeak((errCb) => {
+            console.log(errCb);
+          });
+        }
       };
 
       msgEnd.onclick = function () {
         //关闭喊话（发送）
-        Voice.stopMsg();
+        if (voiceMsg) {
+          voiceMsg.stopSpeak();
+          //下载音频文件之前不能使voiceMsg = null;
+        }
       };
 
       downPCM.onclick = function () {
         //下载PCM
-        Voice.downloadPCM();
+        if (voiceMsg) {
+          voiceMsg.downloadPCM();
+        }
       };
 
       downWAV.onclick = function () {
         //下载WAV
-        Voice.downloadWAV();
+        if (voiceMsg) {
+          voiceMsg.downloadWAV();
+        }
       };
     </script>
   </body>

@@ -1,41 +1,25 @@
 /**
- * 语音喊话
- * 使用：
-import { speakMsg, stopMsg, downloadPCM } from '@/utils/voice/voiceMsg'
-
-const startMsg = () => {
-  const config = {
-    url: 'ws://localhost:1111/socketTest'
-  }
-  speakMsg(config, (err) => {
-    console.log('err: ', err);
-    ElMessage.error(err)
-  })
-}
-const closeMsg = () => {
-  stopMsg()
-}
-const downPcm = () => {
-  downloadPCM();
-}
+ * 录音对象
+ * @param {*} stream 音频流
+ * @param {*} config 配置参数
+ * @param {*} callback 回调函数：用于发送分包数据
  */
+let Recorder = function (stream, config, callback) {
+  //音频配置参数
+  let sampleBits = config.sampleBits || 16; //输出采样数位 8, 16
+  let sampleRate = config.sampleRate || 8000; //输出采样率
+  let bufferSize = 4096; //缓冲区大小
 
-import Media from './media';
-
-let ws = null; //实现WebSocket
-let record = null; //多媒体对象，用来处理音频
-
-function init(rec) {
-  record = rec;
-}
-
-//录音对象
-let Recorder = function (stream) {
-  let sampleBits = 16; //输出采样数位 8, 16
-  let sampleRate = 8000; //输出采样率
   let context = new AudioContext(); //首先new一个AudioContext对象，作为声源的载体
   let audioInput = context.createMediaStreamSource(stream); //将声音输入这个对像，stream 就是上面返回音源
-  let recorder = context.createScriptProcessor(4096, 1, 1); //创建声音的缓存节点，第一个参数缓存大小，一般数值为1024, 2048, 4096, 8192, 16384，这里选用4096，第二个和第三个参数指的是输入和输出的声道数
+  /**
+   * createScriptProcessor 创建声音的缓存节点
+   * 第一个参数为缓存区大小，该取值控制着 audioprocess 事件被分派的频率，以及每一次调用多少样本帧被处理,
+   * 一般数值为1024, 2048, 4096, 8192, 16384，这里选用4096。
+   * 第二个和第三个参数指的是输入和输出的声道数
+   */
+  let recorder = context.createScriptProcessor(bufferSize, 1, 1);
+  // 对音频信号进行处理
   let audioData = {
     size: 0, //录音文件长度
     buffer: [], //录音缓存
@@ -51,6 +35,7 @@ let Recorder = function (stream) {
       this.buffer.push(new Float32Array(data));
       this.size += data.length;
     },
+    // 将收到的音频信号进行预处理，即将二维数组转成一维数组，并且对音频信号进行降采样
     compress: function () {
       //合并
       let data = new Float32Array(this.size);
@@ -59,7 +44,7 @@ let Recorder = function (stream) {
         data.set(this.buffer[i], offset);
         offset += this.buffer[i].length;
       }
-      //压缩
+      //压缩：即降采样，采取每interval长度取一个信号点的方式
       let compression = parseInt(this.inputSampleRate / this.outputSampleRate);
       let length = data.length / compression;
       let result = new Float32Array(length);
@@ -74,6 +59,7 @@ let Recorder = function (stream) {
     },
     encodePCM: function () {
       //这里不对采集到的数据进行其他格式处理，如有需要均交给服务器端处理。
+      //得到格式为pcm,采样率为16k,位深为16bit的音频文件
       let sampleRate = Math.min(this.inputSampleRate, this.outputSampleRate);
       let sampleBits = Math.min(this.inputSampleBits, this.outputSampleBits);
       let bytes = this.compress();
@@ -81,6 +67,7 @@ let Recorder = function (stream) {
       let buffer = new ArrayBuffer(dataLength);
       let data = new DataView(buffer);
       let offset = 0;
+      // 将音频信号转为16bit位深
       for (let i = 0; i < bytes.length; i++, offset += 2) {
         let s = Math.max(-1, Math.min(1, bytes[i]));
         data.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
@@ -189,102 +176,11 @@ let Recorder = function (stream) {
   };
 
   // 此方法音频缓存，这里audioData是自定义对象，这个对象会实现缓存pcm数据
+  // 一个缓存区触发一次： 4096个样本帧
   recorder.onaudioprocess = function (e) {
-    let inputBuffer = e.inputBuffer.getChannelData(0);
+    let inputBuffer = e.inputBuffer.getChannelData(0); //取单音道信号
     audioData.input(inputBuffer);
+    callback(audioData);
   };
 };
-
-/*
- * WebSocket
- */
-function useWebSocket(config) {
-  ws = new WebSocket(config.url);
-  ws.binaryType = 'arraybuffer'; //传输的是 ArrayBuffer 类型的数据
-  ws.onopen = function () {
-    console.log('握手成功');
-    if (ws.readyState == 1) {
-      //ws进入连接状态，则每隔500毫秒发送一包数据
-      record.start();
-    }
-  };
-
-  ws.onmessage = function (msg) {
-    console.info(msg);
-  };
-
-  ws.onerror = function (err) {
-    console.info(err);
-  };
-}
-
-/*
- * 开始对讲
- */
-function speakMsg(config, errFun) {
-  let media = new Media();
-  media
-    .promiseStream()
-    .then((mediaStream) => {
-      init(new Recorder(mediaStream));
-      console.log('开始对讲');
-      useWebSocket(config);
-    })
-    .catch((msg) => {
-      errFun(msg);
-    });
-}
-
-/*
- * 关闭对讲
- */
-function stopMsg() {
-  if (ws) {
-    let reader = new FileReader();
-    reader.onload = (e) => {
-      let outBuffer = e.target.result;
-      let arr = new Int8Array(outBuffer);
-      ws.send(arr);
-      ws.close();
-      record.stop();
-      console.log('关闭对讲以及WebSocket');
-    };
-    reader.readAsArrayBuffer(record.getBlob());
-  }
-}
-
-/**
- * 下载PCM文件
- */
-function downloadPCM() {
-  if (record === null) return alert('请先开始录音');
-
-  var oA = document.createElement('a');
-  oA.href = window.URL.createObjectURL(record.getBlob());
-  console.log('oA.href: ', oA.href);
-  oA.download = oA.href.split('/')[3] + '.pcm';
-  oA.click();
-
-  ws.close();
-  record.stop();
-  console.log('关闭对讲以及WebSocket，然后下载PCM文件');
-}
-
-/**
- * 下载wav文件
- */
-function downloadWAV() {
-  if (record === null) return alert('请先开始录音');
-
-  var oA = document.createElement('a');
-  oA.href = window.URL.createObjectURL(record.getWav());
-  console.log('oA.href: ', oA.href);
-  oA.download = oA.href.split('/')[3] + '.wav';
-  oA.click();
-
-  ws.close();
-  record.stop();
-  console.log('关闭对讲以及WebSocket，然后下载WAV文件');
-}
-
-export { speakMsg, stopMsg, downloadPCM, downloadWAV };
+export default Recorder;

@@ -8,9 +8,9 @@ module.exports = {
     // 打包文件夹
     publicPath: "dist",
     // 打包文件
-    filename: "voice.js",
+    filename: "index.js",
     // 设置对外暴露对象的全局名称
-    library: "Voice",
+    library: "RealtimeVoice",
     // 打包生成通过esm、commonjs、requirejs的语法引入
     libraryTarget: "umd",
   },
