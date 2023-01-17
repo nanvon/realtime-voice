@@ -3,6 +3,7 @@
  */
 import Media from './media';
 import Recorder from './recorder';
+import { alawFromPCM } from './g711a.js';
 
 export class intercom {
   constructor(config) {
@@ -50,7 +51,8 @@ export class intercom {
               for (let i = 0; i < arr.byteLength; i++) {
                 tmpArr[j++] = arr[i];
                 if ((i + 1) % 1024 == 0) {
-                  this.ws.send(tmpArr);
+                  this.ws.send(alawFromPCM(tmpArr));
+                  // console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
                   if (arr.byteLength - i - 1 >= 1024) {
                     tmpArr = new Int8Array(1024);
                   } else {
@@ -59,7 +61,8 @@ export class intercom {
                   j = 0;
                 }
                 if (i + 1 == arr.byteLength && (i + 1) % 1024 != 0) {
-                  this.ws.send(tmpArr);
+                  this.ws.send(alawFromPCM(tmpArr));
+                  // console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
                 }
               }
             }
