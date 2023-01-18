@@ -1,7 +1,3 @@
-/**
- * G711U(u-law) - PCM converter
- */
-
 const SIGN_BIT = 0x80;
 const QUANT_MASK = 0x0f;
 const SEG_SHIFT = 0x04;
@@ -90,7 +86,7 @@ function alaw2linear(a_val) {
  * @param bit
  * @returns
  */
-export function alawToPCM(data, bit = 16){
+export function alawToPCM(data, bit = 16) {
   let typedArray = bit === 16 ? Int16Array : Int8Array;
   let dest = new typedArray(data.length);
   for (let i = 0, k = 0, len = data.length; i < len; i++) {

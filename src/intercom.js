@@ -4,6 +4,7 @@
 import Media from './media';
 import Recorder from './recorder';
 import { alawFromPCM } from './g711a.js';
+import { RtpPacket } from './rtppacket';
 
 export class intercom {
   constructor(config) {
@@ -52,8 +53,15 @@ export class intercom {
               for (let i = 0; i < arr.byteLength; i++) {
                 tmpArr[j++] = arr[i];
                 if ((i + 1) % _size == 0) {
-                  this.ws.send(alawFromPCM(tmpArr));
-                  // console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
+                  // this.ws.send(alawFromPCM(tmpArr));
+                  const rtp = new RtpPacket(alawFromPCM(tmpArr));
+                  rtp.time += alawFromPCM(tmpArr).length;
+                  rtp.seq++;
+                  this.ws.send(rtp.packet);
+                  console.log('rtp: ', rtp);
+                  console.log('rtp.packet: ', rtp.packet);
+                  // console.log('tmpArr: ', tmpArr);
+                  console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
                   if (arr.byteLength - i - 1 >= _size) {
                     tmpArr = new Int8Array(_size);
                   } else {
@@ -62,8 +70,15 @@ export class intercom {
                   j = 0;
                 }
                 if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
-                  this.ws.send(alawFromPCM(tmpArr));
-                  // console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
+                  // this.ws.send(alawFromPCM(tmpArr));
+                  const rtp = new RtpPacket(alawFromPCM(tmpArr));
+                  rtp.time += alawFromPCM(tmpArr).length;
+                  rtp.seq++;
+                  this.ws.send(rtp.packet);
+                  console.log('rtp: ', rtp);
+                  console.log('rtp.packet: ', rtp.packet);
+                  // console.log('tmpArr: ', tmpArr);
+                  console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
                 }
               }
             }
