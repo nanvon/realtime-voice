@@ -35,6 +35,7 @@ export class intercom {
     };
   };
   startSpeak = (errCb) => {
+    const _size = 682;
     let media = new Media();
     media
       .promiseStream()
@@ -46,21 +47,21 @@ export class intercom {
             let outBuffer = e.target.result;
             let arr = new Int8Array(outBuffer);
             if (arr.length > 0) {
-              let tmpArr = new Int8Array(1024); //1024字节
+              let tmpArr = new Int8Array(_size); //_size字节
               let j = 0;
               for (let i = 0; i < arr.byteLength; i++) {
                 tmpArr[j++] = arr[i];
-                if ((i + 1) % 1024 == 0) {
+                if ((i + 1) % _size == 0) {
                   this.ws.send(alawFromPCM(tmpArr));
                   // console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
-                  if (arr.byteLength - i - 1 >= 1024) {
-                    tmpArr = new Int8Array(1024);
+                  if (arr.byteLength - i - 1 >= _size) {
+                    tmpArr = new Int8Array(_size);
                   } else {
                     tmpArr = new Int8Array(arr.byteLength - i - 1);
                   }
                   j = 0;
                 }
-                if (i + 1 == arr.byteLength && (i + 1) % 1024 != 0) {
+                if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
                   this.ws.send(alawFromPCM(tmpArr));
                   // console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
                 }
