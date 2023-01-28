@@ -24,6 +24,13 @@ export const RtpPacket = function (bufpayload) {
   //   this._bufpkt = bufpayload;
   // } else {
   // this._bufpkt = new Uint8Array(12 + bufpayload.length);
+
+  //tcp
+  let tcpHeader = new Uint8Array(2);
+  const len = bufpayload.length + 12;
+  tcpHeader[0] = (len >> 8) & 0xff;
+  tcpHeader[1] = len & 0xff;
+
   this._bufpkt = new Uint8Array(12);
   this._bufpkt[0] = 0x80;
   this._bufpkt[1] = 0;
@@ -39,7 +46,7 @@ export const RtpPacket = function (bufpayload) {
   this._bufpkt[10] = 0;
   this._bufpkt[11] = 1;
   // bufpayload.copyWithin(this._bufpkt, 12);
-  this._bufpkt = concatenate(Uint8Array, this._bufpkt, bufpayload);
+  this._bufpkt = concatenate(Uint8Array, tcpHeader, this._bufpkt, bufpayload);
   // }
 };
 
