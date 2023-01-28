@@ -61,7 +61,7 @@ export class intercom {
                   console.log('rtp: ', rtp);
                   console.log('rtp.packet: ', rtp.packet);
                   // console.log('tmpArr: ', tmpArr);
-                  console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
+                  // console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
                   if (arr.byteLength - i - 1 >= _size) {
                     tmpArr = new Int8Array(_size);
                   } else {
@@ -78,7 +78,7 @@ export class intercom {
                   console.log('rtp: ', rtp);
                   console.log('rtp.packet: ', rtp.packet);
                   // console.log('tmpArr: ', tmpArr);
-                  console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
+                  // console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
                 }
               }
             }
