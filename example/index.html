@@ -7,12 +7,16 @@
     <title>Document</title>
   </head>
   <body>
+    <br />
     <button id="intercomBegin">开始对讲</button>
     <button id="intercomEnd">关闭对讲</button><br />
-    <button id="msgBegin">开始喊话</button>
-    <button id="msgEnd">关闭喊话（发送）</button><br />
-    <button id="downPCM">下载PCM</button>
-    <button id="downWAV">下载WAV</button>
+    <hr />
+    <br />
+    <div>
+      <button id="msgBegin">开始喊话</button> <button id="msgEnd">关闭喊话（发送）</button><br />
+      <button id="downPCM">下载PCM</button>
+      <button id="downWAV">下载WAV</button>
+    </div>
 
     <script src="../dist/index.js"></script>
     <script>
@@ -24,7 +28,7 @@
       let downWAV = document.getElementById('downWAV');
 
       const config = {
-        url: 'ws://192.168.6.129:2333/test',
+        url: 'ws://192.168.6.212:7777/websocket/voice/123',
         sampleBits: 16, //输出采样数位，可以不配置，默认是16
         sampleRate: 8000, //输出采样率，可以不配置，默认是8k
       };

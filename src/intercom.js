@@ -36,7 +36,7 @@ export class intercom {
     };
   };
   startSpeak = (errCb) => {
-    const _size = 682;
+    const _size = 640;
     let media = new Media();
     media
       .promiseStream()
