@@ -52,9 +52,9 @@ export class intercom {
             //测试下载文件
             // var oA = document.createElement('a');
             // let aLawSamples = alawmulaw.alaw.encode(arr);
-            // oA.href = window.URL.createObjectURL(new Blob([aLawSamples]));
+            // oA.href = window.URL.createObjectURL(new Blob([arr]));
             // console.log('oA.href: ', oA.href);
-            // oA.download = oA.href.split('/')[3] + '.g711a';
+            // oA.download = oA.href.split('/')[3] + '.pcm';
             // oA.click();
 
             if (arr.length > 0) {
