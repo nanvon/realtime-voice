@@ -3,8 +3,9 @@
  */
 import Media from './media';
 import Recorder from './recorder';
-import { alawFromPCM } from './g711a.js';
+// import { alawFromPCM } from './g711a.js';
 import { RtpPacket } from './rtppacket';
+const alawmulaw = require('alawmulaw');
 
 export class intercom {
   constructor(config) {
@@ -46,39 +47,40 @@ export class intercom {
           let reader = new FileReader();
           reader.onload = (e) => {
             let outBuffer = e.target.result;
-            let arr = new Int8Array(outBuffer);
+            let arr = new Int16Array(outBuffer);
+
+            //测试下载文件
+            // var oA = document.createElement('a');
+            // let aLawSamples = alawmulaw.alaw.encode(arr);
+            // oA.href = window.URL.createObjectURL(new Blob([aLawSamples]));
+            // console.log('oA.href: ', oA.href);
+            // oA.download = oA.href.split('/')[3] + '.g711a';
+            // oA.click();
+
             if (arr.length > 0) {
-              let tmpArr = new Int8Array(_size); //_size字节
+              let tmpArr = new Int16Array(_size); //_size字节
               let j = 0;
               for (let i = 0; i < arr.byteLength; i++) {
                 tmpArr[j++] = arr[i];
                 if ((i + 1) % _size == 0) {
-                  // this.ws.send(alawFromPCM(tmpArr));
-                  const rtp = new RtpPacket(alawFromPCM(tmpArr));
-                  rtp.time += alawFromPCM(tmpArr).length;
+                  let aLawSamples = alawmulaw.alaw.encode(tmpArr);
+                  const rtp = new RtpPacket(aLawSamples);
+                  rtp.time += aLawSamples.length;
                   rtp.seq++;
                   this.ws.send(rtp.packet);
-                  console.log('rtp: ', rtp);
-                  console.log('rtp.packet: ', rtp.packet);
-                  // console.log('tmpArr: ', tmpArr);
-                  // console.log('alawFromPCM(tmpArr): ', alawFromPCM(tmpArr));
                   if (arr.byteLength - i - 1 >= _size) {
-                    tmpArr = new Int8Array(_size);
+                    tmpArr = new Int16Array(_size);
                   } else {
-                    tmpArr = new Int8Array(arr.byteLength - i - 1);
+                    tmpArr = new Int16Array(arr.byteLength - i - 1);
                   }
                   j = 0;
                 }
                 if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
-                  // this.ws.send(alawFromPCM(tmpArr));
-                  const rtp = new RtpPacket(alawFromPCM(tmpArr));
-                  rtp.time += alawFromPCM(tmpArr).length;
+                  let aLawSamples = alawmulaw.alaw.encode(tmpArr);
+                  const rtp = new RtpPacket(aLawSamples);
+                  rtp.time += aLawSamples.length;
                   rtp.seq++;
                   this.ws.send(rtp.packet);
-                  console.log('rtp: ', rtp);
-                  console.log('rtp.packet: ', rtp.packet);
-                  // console.log('tmpArr: ', tmpArr);
-                  // console.log('alawFromPCM(tmpArr)--: ', alawFromPCM(tmpArr));
                 }
               }
             }
