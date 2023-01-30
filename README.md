@@ -12,6 +12,8 @@
 //先切换至私有库地址
 
 npm install realtime-voice
+
+Jenkins自动部署时，下载公司私有库可能会出问题。可以将src下面js文件都复制到项目中来使用
 ```
 
 ```javascript

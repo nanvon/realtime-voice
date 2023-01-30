@@ -8,7 +8,7 @@ let Recorder = function (stream, config, callback) {
   //音频配置参数
   let sampleBits = config.sampleBits || 16; //输出采样数位 8, 16
   let sampleRate = config.sampleRate || 8000; //输出采样率
-  let bufferSize = 16384; //缓冲区大小
+  let bufferSize = 2048; //缓冲区大小
 
   let context = new AudioContext(); //首先new一个AudioContext对象，作为声源的载体
   let audioInput = context.createMediaStreamSource(stream); //将声音输入这个对像，stream 就是上面返回音源

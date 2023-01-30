@@ -36,7 +36,7 @@ export class intercom {
     };
   };
   startSpeak = (errCb) => {
-    const _size = 640;
+    const _size = 546;
     let media = new Media();
     media
       .promiseStream()
@@ -47,44 +47,57 @@ export class intercom {
           reader.onload = (e) => {
             let outBuffer = e.target.result;
             let arr = new Int16Array(outBuffer);
+            console.log('arr: ', arr);
+
+            let aLawSamples = alaw.encode(arr);
+            console.log('aLawSamples: ', aLawSamples);
+            // console.log('arr: ', arr);
+            const rtp = new RtpPacket(aLawSamples);
+            rtp.time += aLawSamples.length;
+            rtp.seq++;
+            this.ws.send(rtp.packet);
+            // console.log('rtp.packet: ', rtp.packet);
 
             //测试下载文件
             // var oA = document.createElement('a');
             // let aLawSamples = alaw.encode(arr);
-            // oA.href = window.URL.createObjectURL(new Blob([arr]));
+            // oA.href = window.URL.createObjectURL(new Blob([aLawSamples]));
             // console.log('oA.href: ', oA.href);
-            // oA.download = oA.href.split('/')[3] + '.pcm';
+            // oA.download = oA.href.split('/')[3] + '.g711a';
             // oA.click();
 
-            if (arr.length > 0) {
-              let tmpArr = new Int16Array(_size); //_size字节
-              let j = 0;
-              for (let i = 0; i < arr.byteLength; i++) {
-                tmpArr[j++] = arr[i];
-                if ((i + 1) % _size == 0) {
-                  let aLawSamples = alaw.encode(tmpArr);
-                  const rtp = new RtpPacket(aLawSamples);
-                  rtp.time += aLawSamples.length;
-                  rtp.seq++;
-                  this.ws.send(rtp.packet);
-                  console.log('rtp.packet: ', rtp.packet);
-                  if (arr.byteLength - i - 1 >= _size) {
-                    tmpArr = new Int16Array(_size);
-                  } else {
-                    tmpArr = new Int16Array(arr.byteLength - i - 1);
-                  }
-                  j = 0;
-                }
-                if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
-                  let aLawSamples = alaw.encode(tmpArr);
-                  const rtp = new RtpPacket(aLawSamples);
-                  rtp.time += aLawSamples.length;
-                  rtp.seq++;
-                  this.ws.send(rtp.packet);
-                  console.log('rtp.packet: ', rtp.packet);
-                }
-              }
-            }
+            //分包-现将bufferSize调小，不进行分包，以免产生较大延时
+            // if (arr.length > 0) {
+            //   let tmpArr = new Int16Array(_size); //_size字节
+            //   let j = 0;
+            //   for (let i = 0; i < arr.byteLength; i++) {
+            //     tmpArr[j++] = arr[i];
+            //     if ((i + 1) % _size == 0) {
+            //       let aLawSamples = alaw.encode(tmpArr);
+            //       console.log('aLawSamples: ', aLawSamples);
+            //       console.log('tmpArr: ', tmpArr);
+            //       const rtp = new RtpPacket(aLawSamples);
+            //       rtp.time += aLawSamples.length;
+            //       rtp.seq++;
+            //       this.ws.send(rtp.packet);
+            //       // console.log('rtp.packet: ', rtp.packet);
+            //       if (arr.byteLength - i - 1 >= _size) {
+            //         tmpArr = new Int16Array(_size);
+            //       } else {
+            //         tmpArr = new Int16Array(arr.byteLength - i - 1);
+            //       }
+            //       j = 0;
+            //     }
+            //     if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
+            //       let aLawSamples = alaw.encode(tmpArr);
+            //       const rtp = new RtpPacket(aLawSamples);
+            //       rtp.time += aLawSamples.length;
+            //       rtp.seq++;
+            //       this.ws.send(rtp.packet);
+            //       // console.log('rtp.packet: ', rtp.packet);
+            //     }
+            //   }
+            // }
           };
           reader.readAsArrayBuffer(audioData.encodePCM());
           audioData.clear(); //每次发送完成则清理掉旧数据
