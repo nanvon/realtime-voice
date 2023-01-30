@@ -20,7 +20,7 @@ export class intercom {
     this.ws = new WebSocket(url);
     this.ws.binaryType = 'arraybuffer'; //传输的是 ArrayBuffer 类型的数据
     this.ws.onopen = () => {
-      console.log('ws握手成功');
+      console.log('语音对讲ws握手成功');
       if (this.ws.readyState == 1) {
         //ws进入连接状态，则每隔500毫秒发送一包数据
         this.record.start();
@@ -47,10 +47,10 @@ export class intercom {
           reader.onload = (e) => {
             let outBuffer = e.target.result;
             let arr = new Int16Array(outBuffer);
-            console.log('arr: ', arr);
+            // console.log('arr: ', arr);
 
             let aLawSamples = alaw.encode(arr);
-            console.log('aLawSamples: ', aLawSamples);
+            // console.log('aLawSamples: ', aLawSamples);
             // console.log('arr: ', arr);
             const rtp = new RtpPacket(aLawSamples);
             rtp.time += aLawSamples.length;
@@ -113,7 +113,7 @@ export class intercom {
     if (this.ws) {
       this.record.stop();
       this.ws.close();
-      console.log('ws关闭成功');
+      console.log('语音对讲ws关闭成功');
     }
   };
 }
