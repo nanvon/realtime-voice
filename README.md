@@ -18,9 +18,7 @@ npm install realtime-voice
 import { VoiceIntercom, VoiceMessage } from 'realtime-voice/dist/index';
 
 const config = {
-  url: 'ws://192.168.6.129:2333/test',
-  sampleBits: 16, //输出采样数位，可以不配置，默认是16
-  sampleRate: 8000, //输出采样率，可以不配置，默认是8k
+  url: 'ws://192.168.6.129:2333/test'
 };
 
 //语音对讲：

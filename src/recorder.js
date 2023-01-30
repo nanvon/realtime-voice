@@ -8,14 +8,14 @@ let Recorder = function (stream, config, callback) {
   //音频配置参数
   let sampleBits = config.sampleBits || 16; //输出采样数位 8, 16
   let sampleRate = config.sampleRate || 8000; //输出采样率
-  let bufferSize = 4096; //缓冲区大小
+  let bufferSize = 16384; //缓冲区大小
 
   let context = new AudioContext(); //首先new一个AudioContext对象，作为声源的载体
   let audioInput = context.createMediaStreamSource(stream); //将声音输入这个对像，stream 就是上面返回音源
   /**
    * createScriptProcessor 创建声音的缓存节点
    * 第一个参数为缓存区大小，该取值控制着 audioprocess 事件被分派的频率，以及每一次调用多少样本帧被处理,
-   * 一般数值为1024, 2048, 4096, 8192, 16384，这里选用4096。
+   * 一般数值为1024, 2048, 4096, 8192, 16384。
    * 第二个和第三个参数指的是输入和输出的声道数
    */
   let recorder = context.createScriptProcessor(bufferSize, 1, 1);
@@ -176,7 +176,7 @@ let Recorder = function (stream, config, callback) {
   };
 
   // 此方法音频缓存，这里audioData是自定义对象，这个对象会实现缓存pcm数据
-  // 一个缓存区触发一次： 4096个样本帧
+  // 一个缓存区触发一次： bufferSize个样本帧
   recorder.onaudioprocess = function (e) {
     let inputBuffer = e.inputBuffer.getChannelData(0); //取单音道信号
     audioData.input(inputBuffer);
