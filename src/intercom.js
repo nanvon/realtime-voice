@@ -3,9 +3,8 @@
  */
 import Media from './media';
 import Recorder from './recorder';
-// import { alawFromPCM } from './g711a.js';
 import { RtpPacket } from './rtppacket';
-const alawmulaw = require('alawmulaw');
+import * as alaw from './alaw';
 
 export class intercom {
   constructor(config) {
@@ -51,7 +50,7 @@ export class intercom {
 
             //测试下载文件
             // var oA = document.createElement('a');
-            // let aLawSamples = alawmulaw.alaw.encode(arr);
+            // let aLawSamples = alaw.encode(arr);
             // oA.href = window.URL.createObjectURL(new Blob([arr]));
             // console.log('oA.href: ', oA.href);
             // oA.download = oA.href.split('/')[3] + '.pcm';
@@ -63,11 +62,12 @@ export class intercom {
               for (let i = 0; i < arr.byteLength; i++) {
                 tmpArr[j++] = arr[i];
                 if ((i + 1) % _size == 0) {
-                  let aLawSamples = alawmulaw.alaw.encode(tmpArr);
+                  let aLawSamples = alaw.encode(tmpArr);
                   const rtp = new RtpPacket(aLawSamples);
                   rtp.time += aLawSamples.length;
                   rtp.seq++;
                   this.ws.send(rtp.packet);
+                  console.log('rtp.packet: ', rtp.packet);
                   if (arr.byteLength - i - 1 >= _size) {
                     tmpArr = new Int16Array(_size);
                   } else {
@@ -76,11 +76,12 @@ export class intercom {
                   j = 0;
                 }
                 if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
-                  let aLawSamples = alawmulaw.alaw.encode(tmpArr);
+                  let aLawSamples = alaw.encode(tmpArr);
                   const rtp = new RtpPacket(aLawSamples);
                   rtp.time += aLawSamples.length;
                   rtp.seq++;
                   this.ws.send(rtp.packet);
+                  console.log('rtp.packet: ', rtp.packet);
                 }
               }
             }
