@@ -4,7 +4,7 @@
 
 ## Description
 
-支持实时语音对讲、语音喊话、导出录音文件
+支持实时语音喊话、语音消息、导出录音文件
 
 ## Usage
 
@@ -13,7 +13,6 @@
 
 npm install realtime-voice
 
-Jenkins自动部署时，下载公司私有库可能会出问题。可以将src下面js文件都复制到项目中来使用
 ```
 
 ```javascript
@@ -23,7 +22,7 @@ const config = {
   url: 'ws://192.168.6.129:2333/test'
 };
 
-//语音对讲：
+//语音喊话：
 let intercom = ref(null);
 const start = () => {
   if (!intercom.value) {
@@ -40,7 +39,7 @@ const stop = () => {
   }
 };
 
-//语音喊话：
+//语音消息：
 let msg = ref(null);
 const startMsg = () => {
   if (!msg.value) {
@@ -69,8 +68,8 @@ const downWav = () => {
 //详细语法见`/example/index.html`或`index.vue`
 ```
 
-~~暂时不支持同时多个对讲实例，如：开启 A 对讲，在开启 B 对讲之前，需要先关闭 A 对讲。~~  
-现已支持同时多个对讲实例。
+~~暂时不支持同时多个喊话实例，如：开启 A 喊话，在开启 B 喊话之前，需要先关闭 A 喊话。~~  
+现已支持同时多个喊话实例，只要ws服务、语音服务支持即可.
 
 ## Contribution
 

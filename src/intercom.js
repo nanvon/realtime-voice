@@ -1,10 +1,8 @@
 /**
- * 实时语音对讲
+ * 实时语音喊话
  */
 import Media from './media';
 import Recorder from './recorder';
-import { RtpPacket } from './rtppacket';
-import * as alaw from './alaw';
 
 export class intercom {
   constructor(config) {
@@ -12,98 +10,81 @@ export class intercom {
     this.url = config.url;
     this.ws = null;
     this.record = null;
+    this.err = false; //记录网络错误或ws返回出错信息
+    this._mediaStream = null;
   }
   init = (rec) => {
     this.record = rec;
   };
-  startWs = (url) => {
+  startWs = (url, msgCallback, errCallback) => {
     this.ws = new WebSocket(url);
     this.ws.binaryType = 'arraybuffer'; //传输的是 ArrayBuffer 类型的数据
     this.ws.onopen = () => {
-      console.log('语音对讲ws握手成功');
+      console.log('语音喊话ws握手成功');
       if (this.ws.readyState == 1) {
         //ws进入连接状态，则每隔500毫秒发送一包数据
         this.record.start();
       }
     };
 
+    //与后端约定：ws服务只会发送错误信息
     this.ws.onmessage = function (msg) {
       console.info(msg);
+      msgCallback(msg.data);
     };
 
     this.ws.onerror = function (err) {
       console.info(err);
+      errCallback('WebSocket连接错误');
     };
   };
   startSpeak = (errCb) => {
-    const _size = 546;
     let media = new Media();
     media
       .promiseStream()
       .then((mediaStream) => {
+        this._mediaStream = mediaStream;
         let _recorder = new Recorder(mediaStream, this.config, (audioData) => {
           //对以获取的数据进行处理(分包)
           let reader = new FileReader();
           reader.onload = (e) => {
             let outBuffer = e.target.result;
-            let arr = new Int16Array(outBuffer);
-            // console.log('arr: ', arr);
-
-            let aLawSamples = alaw.encode(arr);
-            // console.log('aLawSamples: ', aLawSamples);
-            // console.log('arr: ', arr);
-            const rtp = new RtpPacket(aLawSamples);
-            rtp.time += aLawSamples.length;
-            rtp.seq++;
-            this.ws.send(rtp.packet);
-            // console.log('rtp.packet: ', rtp.packet);
+            console.log('this.ws.readyState: ', this.ws.readyState);
+            //1 (WebSocket.OPEN)已经链接并且可以通讯 才发送
+            if (this.ws.readyState == 1) {
+              this.ws.send(outBuffer);
+            }
 
             //测试下载文件
             // var oA = document.createElement('a');
-            // let aLawSamples = alaw.encode(arr);
-            // oA.href = window.URL.createObjectURL(new Blob([aLawSamples]));
+            // oA.href = window.URL.createObjectURL(new Blob([arr]));
             // console.log('oA.href: ', oA.href);
-            // oA.download = oA.href.split('/')[3] + '.g711a';
+            // oA.download = oA.href.split('/')[3] + '.pcm';
             // oA.click();
-
-            //分包-现将bufferSize调小，不进行分包，以免产生较大延时
-            // if (arr.length > 0) {
-            //   let tmpArr = new Int16Array(_size); //_size字节
-            //   let j = 0;
-            //   for (let i = 0; i < arr.byteLength; i++) {
-            //     tmpArr[j++] = arr[i];
-            //     if ((i + 1) % _size == 0) {
-            //       let aLawSamples = alaw.encode(tmpArr);
-            //       console.log('aLawSamples: ', aLawSamples);
-            //       console.log('tmpArr: ', tmpArr);
-            //       const rtp = new RtpPacket(aLawSamples);
-            //       rtp.time += aLawSamples.length;
-            //       rtp.seq++;
-            //       this.ws.send(rtp.packet);
-            //       // console.log('rtp.packet: ', rtp.packet);
-            //       if (arr.byteLength - i - 1 >= _size) {
-            //         tmpArr = new Int16Array(_size);
-            //       } else {
-            //         tmpArr = new Int16Array(arr.byteLength - i - 1);
-            //       }
-            //       j = 0;
-            //     }
-            //     if (i + 1 == arr.byteLength && (i + 1) % _size != 0) {
-            //       let aLawSamples = alaw.encode(tmpArr);
-            //       const rtp = new RtpPacket(aLawSamples);
-            //       rtp.time += aLawSamples.length;
-            //       rtp.seq++;
-            //       this.ws.send(rtp.packet);
-            //       // console.log('rtp.packet: ', rtp.packet);
-            //     }
-            //   }
-            // }
           };
           reader.readAsArrayBuffer(audioData.encodePCM());
           audioData.clear(); //每次发送完成则清理掉旧数据
         });
         this.init(_recorder);
-        this.startWs(this.url);
+        this.startWs(
+          this.url,
+          (data) => {
+            //接收到信息，代表后端中转WebSocket服务在请求语音喊话sever时出错所返回的信息
+            alert(data);
+            this.err = true;
+            this.record.stop();
+            this.ws.close();
+            this._mediaStream.getTracks().forEach((track) => track.stop());
+          },
+          (data) => {
+            //接收到信息，代表后端中转WebSocket服务在请求语音喊话sever时出错所返回的信息
+            alert(data);
+            this.err = true;
+            this.record.stop();
+            this.ws.close();
+            this._mediaStream.getTracks().forEach((track) => track.stop());
+          }
+        );
       })
       .catch((msg) => {
         errCb(msg);
@@ -113,7 +94,8 @@ export class intercom {
     if (this.ws) {
       this.record.stop();
       this.ws.close();
-      console.log('语音对讲ws关闭成功');
+      this._mediaStream.getTracks().forEach((track) => track.stop());
+      console.log('语音喊话ws关闭成功');
     }
   };
 }

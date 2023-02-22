@@ -1,7 +1,7 @@
 {
   "name": "realtime-voice",
-  "version": "0.3.0",
-  "description": "与摄像头进行实时语音对讲",
+  "version": "1.0.0",
+  "description": "与摄像头进行实时语音喊话",
   "main": "index.js",
   "scripts": {
     "build:watch": "webpack --watch"

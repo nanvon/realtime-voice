@@ -25,8 +25,8 @@ let Recorder = function (stream, config, callback) {
     buffer: [], //录音缓存
     inputSampleRate: 48000, //输入采样率
     inputSampleBits: 16, //输入采样数位 8, 16
-    outputSampleRate: sampleRate, //输出采样数位
-    outputSampleBits: sampleBits, //输出采样率
+    outputSampleRate: sampleRate, //输出采样率
+    outputSampleBits: sampleBits, //输出采样数位
     clear: function () {
       this.buffer = [];
       this.size = 0;

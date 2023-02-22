@@ -8,12 +8,12 @@
   </head>
   <body>
     <br />
-    <button id="intercomBegin">开始对讲</button>
-    <button id="intercomEnd">关闭对讲</button><br />
+    <button id="intercomBegin">开始喊话</button>
+    <button id="intercomEnd">关闭喊话</button><br />
     <hr />
     <br />
     <div>
-      <button id="msgBegin">开始喊话</button> <button id="msgEnd">关闭喊话（发送）</button><br />
+      <button id="msgBegin">开始录音</button> <button id="msgEnd">关闭录音（发送）</button><br />
       <button id="downPCM">下载PCM</button>
       <button id="downWAV">下载WAV</button>
     </div>
@@ -28,13 +28,13 @@
       let downWAV = document.getElementById('downWAV');
 
       const config = {
-        url: 'ws://192.168.6.212:7777/websocket/voice/123'
+        url: 'ws://192.168.6.120:7777/websocket/123'
       };
       var voiceItc = null;
       var voiceMsg = null;
 
       begin.onclick = function () {
-        //开始对讲，不需要再写获取浏览器音频的代码
+        //开始喊话，不需要再写获取浏览器音频的代码
         if (!voiceItc) {
           voiceItc = RealtimeVoice.VoiceIntercom.createIntercom(config);
           voiceItc.startSpeak((errCb) => {
@@ -44,7 +44,7 @@
       };
 
       end.onclick = function () {
-        //关闭对讲
+        //关闭喊话
         if (voiceItc) {
           voiceItc.stopSpeak();
           voiceItc = null;
@@ -52,7 +52,7 @@
       };
 
       msgBegin.onclick = function () {
-        //开始喊话
+        //开始录音
         if (!voiceMsg) {
           voiceMsg = RealtimeVoice.VoiceMessage.createMsg(config);
           voiceMsg.startSpeak((errCb) => {
@@ -62,7 +62,7 @@
       };
 
       msgEnd.onclick = function () {
-        //关闭喊话（发送）
+        //关闭录音（发送）
         if (voiceMsg) {
           voiceMsg.stopSpeak();
           //下载音频文件之前不能使voiceMsg = null;
