@@ -1,6 +1,6 @@
 # realtime-voice
 
-[仓库地址](https://gitlab.bitahub.com/zhnn-application-development/realtime-voice)
+[仓库地址](https://github.com/nanvon/realtime-voice)
 
 ## Description
 
